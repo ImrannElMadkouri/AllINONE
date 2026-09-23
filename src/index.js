@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config');
+const { available: automodAvailable } = require('./automod/classifier');
 const { loadCommands } = require('./utils/loadCommands');
 
 if (!token) {
@@ -9,9 +10,11 @@ if (!token) {
   process.exit(1);
 }
 
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
-});
+const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates];
+// AutoMod needs to read messages. Message Content is a privileged intent, so only ask for it when AutoMod is configured.
+if (automodAvailable()) intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
+
+const client = new Client({ intents });
 
 client.commands = new Collection(loadCommands().map((c) => [c.data.name, c]));
 

@@ -6,7 +6,7 @@ const path = require('node:path');
 const commands = loadCommands();
 for (const c of commands) c.data.toJSON(); // throws on invalid builders
 
-for (const dir of ['events', 'voice', 'utils']) {
+for (const dir of ['events', 'voice', 'utils', 'automod']) {
   for (const f of fs.readdirSync(path.join(__dirname, '..', 'src', dir))) require(path.join(__dirname, '..', 'src', dir, f));
 }
 require('../src/voice/panel').components().forEach((row) => row.toJSON());

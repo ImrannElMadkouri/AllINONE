@@ -10,4 +10,10 @@ module.exports = {
 
   // Default name for new join-to-create channels. {user} is replaced with the owner's display name.
   voiceNameTemplate: "{user}'s channel",
+
+  // AutoMod. Both must be set for AutoMod to be available.
+  automod: {
+    apiKey: process.env.OPENROUTER_API_KEY || null,
+    model: process.env.AUTOMOD_MODEL || null,
+  },
 };
