@@ -44,40 +44,41 @@ Only the owner can use the controls, except Claim and Info. The channel is delet
 
 ## Setup
 
-1. Create an application at https://discord.com/developers/applications and add a bot. If you use AutoMod, turn on **Message Content Intent** under *Bot → Privileged Gateway Intents*. Nothing else needs it.
-2. Install and configure:
+1. Install **Python 3.10 or newer**.
+2. Create an application at https://discord.com/developers/applications and add a bot. If you use AutoMod, turn on **Message Content Intent** under *Bot → Privileged Gateway Intents*. Nothing else needs it.
+3. Install the requirements and configure:
    ```sh
-   npm install
-   cp .env.example .env   # fill in DISCORD_TOKEN and CLIENT_ID
+   python -m venv .venv
+   .venv\Scripts\activate        # Windows
+   source .venv/bin/activate     # macOS / Linux
+   pip install -r requirements.txt
+   cp .env.example .env          # then fill in DISCORD_TOKEN
    ```
    For AutoMod, also set `OPENROUTER_API_KEY` and `AUTOMOD_MODEL` (an OpenRouter model ID). Leave them empty to run without AutoMod.
-3. Invite the bot with the permissions it needs (replace `CLIENT_ID`):
+4. Invite the bot with the permissions it needs (replace `CLIENT_ID` with your Application ID):
    ```
    https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot+applications.commands&permissions=1099932199958
    ```
    Put Bunny's role **above** the roles it should moderate.
-4. Register the slash commands, then start the bot:
+5. Start the bot:
    ```sh
-   npm run deploy
-   npm start
+   python main.py
    ```
-   Set `DEV_GUILD_ID` in `.env` while testing so commands register in your server instantly. Global registration can take up to an hour.
-5. In Discord, run `/setup modlog`, `/setup voice` and `/automod enable`.
+   Slash commands sync automatically on startup. Set `DEV_GUILD_ID` in `.env` while testing so they appear in your server instantly. Global sync can take up to an hour.
+6. In Discord, run `/setup modlog`, `/setup voice` and `/automod enable`.
 
 ## Project layout
 
 ```
-src/
-  index.js              client + event loading
-  deploy-commands.js    registers slash commands
-  config.js             token, embed colour, voice name template
-  commands/moderation/  moderation commands
-  commands/config/      /setup, /voice, /help
-  events/               ready, interactions, voice state, channel delete
-  voice/                join-to-create: manager, panel, controls
-  automod/              AutoMod: classifier, engine, review buttons
-  utils/                embed helper, JSON store, moderation helpers
-data/                   bunny.json (settings, warnings, temp channels) — created at runtime
+main.py                  entry point
+bunny/
+  bot.py                 client, intents, command sync, error handling
+  config.py              token, embed colour, voice name template
+  embeds.py              the one embed style every message uses
+  store.py               JSON store (settings, warnings, cases, temp channels)
+  moderation.py          hierarchy checks, DM notices, mod-log cases
+  cogs/                  moderation, setup, voice, automod, help
+  voice/                 join-to-create: manager, panel embed, buttons and modals
+  automod/               AutoMod: classifier, engine, review buttons
+data/                    bunny.json, created at runtime
 ```
-
-`npm run check` loads every module and validates the command definitions without connecting to Discord.
